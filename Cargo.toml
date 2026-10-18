@@ -7,7 +7,12 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-burn = { version = "0.22", features = ["wgpu"] }
+burn = "0.22"
 godot = { version = "0.5.5", features = ["experimental-threads"] }
 image = "0.25.10"
 vtube-trackers = "1.0.1"
+
+[features]
+default = ["cpu"]
+gpu = ["burn/wgpu"]
+cpu = ["burn/flex"]

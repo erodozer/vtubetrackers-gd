@@ -29,7 +29,7 @@ pub struct VtFaceDetection {
 impl IRefCounted for VtFaceDetection {
     fn init(base: Base<RefCounted>) -> Self {
         // select the best available GPU device on your system
-        let device = Device::wgpu(DeviceKind::DefaultDevice);
+        let device = Device::default();
 
         let detector_model = godot::classes::ProjectSettings::singleton().globalize_path(
             "res://addons/vtube_trackers/models/face_detector.bpk"
@@ -69,7 +69,7 @@ impl VtFaceDetection {
         let landmarks = self.face_landmarker.run_detection(&face, &detections).unwrap();
         for detection in &landmarks {
             let blendshapes = self.face_blendshapes.run_detection(&detection.screen_landmarks).unwrap();
-            let data = PackedFloat32Array::from_iter(blendshapes.into_iter());
+            let data = PackedFloat32Array::from(blendshapes);
 
             let m44 = solve_face(&face, &detection);
             let transform = Transform3D::new(
@@ -81,11 +81,10 @@ impl VtFaceDetection {
                 Vector3::new(m44[(0,3)], m44[(1,3)], m44[(2,3)]),
             );
 
-            let mut result = VarDictionary::new();
-            result.set("blendshapes", &data);
-            result.set("transform", transform);
-
-            return result;
+            return vdict!(
+                "blendshapes" => &data,
+                "transform" => transform
+            );
         }
 
         return VarDictionary::default();

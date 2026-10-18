@@ -1,0 +1,44 @@
+name: Build Project
+on:
+  push:
+    paths:
+      - "src/*"
+      - Cargo.lock
+      - Cargo.toml
+env:
+  project: vtubetrackers-gd
+  
+jobs:
+  build:
+    name: Builds extensions for ${{ matrix.platform }}/${{ matrix.runtime}}
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        # Use bash shells on all platforms.
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux
+            target: x86_64-unknown-linux-gnu
+            ext: so
+            runtime: cpu
+          - runner: ubuntu-latest
+            platform: linux
+            target: x86_64-unknown-linux-gnu
+            ext: so
+            runtime: gpu
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1.17.0
+      - name: Build extension
+        run: make package target=${{ matrix.target }} runtime=${{ matrix.runtime }}
+      - name: Save artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.project }}.${{ matrix.platform }}.${{ matrix.runtime }}
+          path: addons/vtube_trackers/lib/*
+

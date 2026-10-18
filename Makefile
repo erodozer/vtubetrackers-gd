@@ -8,7 +8,7 @@ endif
 ARCH=$(shell uname -m)
 
 release:
-	cargo build --release --target $(target)
+	cargo build --release --target $(target) --features $(runtime)
 	cp target/${target}/release/libvtubetrackers_gd.$(EXT) addons/vtube_trackers/lib/libvtubetrackers_gd.release.$(ARCH).$(EXT)
 
 package: release
